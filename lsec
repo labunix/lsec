@@ -1,0 +1,42 @@
+#!/bin/bash
+
+version=1.0
+lastupdate="2019/09/16"
+
+mylsec() {
+  awk -v key="${key}" 'BEGIN{f=0} \
+  {if($0 ~ /^[A-Za-z0-9]/){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
+  END{for(n in a){if(a[n] ~ key){gsub("___","\n",a[n]);print a[n]}}}'
+}
+
+mylsec-v () {
+  awk -v key="${key}" 'BEGIN{f=0} \
+  {if($0 ~ /^[A-Za-z0-9]/){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
+  END{for(n in a){if(a[n] !~ key){gsub("___","\n",a[n]);print a[n]}}}'
+}
+
+case "$1" in
+  -v)
+    shift;
+    key=$@
+    if [ "x$@" == "x" ];then
+      mylsec $key
+    else
+      mylsec-v $key
+    fi
+    ;;
+  -V)
+    echo "Version    :lsec ${version}, LastUpdate ${lastupdate}" >&2
+    echo "Description:This script is \"section for linux\"" >&2
+    echo "Copyright  :Created by labunix" >&2
+    exit 0
+    ;;
+  -h)
+    echo "Usage     : $(basename $0) [-v|-h] keyword list" >&2
+    echo "Version   : $(basename $0) -V" >&2
+    exit 1
+    ;;
+  *)
+    key=$@
+    mylsec $key
+esac
