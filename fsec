@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ -f "$1" ] && [ $# -gt 1 ];then
+  FILE=$1
+  shift
+  WORD="$@"
+  awk -v word="$WORD" \
+    'BEGIN{c=0} \
+          {if($0 ~ /config/){c++;b[c]=NR} \
+      else{if($0 ~ /    edit/){c++;b[c]=NR}}} \
+          {a[c]=a[c]"__"$0} \
+       END{for(n=0;n<=c;n++) \
+          {if(a[n] ~ word){gsub("__","\n",a[n]);print "line="b[n],a[n]}}}' $FILE
+else
+  echo "Usage:$0 {filename} {search word}" >&2
+  exit 1
+fi
