@@ -1,19 +1,48 @@
 #!/bin/bash
 
-version=1.0
-lastupdate="2019/09/16"
+version=1.1
+lastupdate="2019/09/16" # v1.0
+lastupdate="2020/08/03" # v1.1
+lastupdate="2020/08/05" # v1.2 add option [-sep]
+
+sep1="^[A-Za-z0-9\*]"
+sep2="^\134["
+sep3="#  TAG:"
+sep="${sep1}"
 
 mylsec() {
-  awk -v key="${key}" 'BEGIN{f=0} \
-  {if($0 ~ /^[A-Za-z0-9]/){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
+  awk -v key="${key}" -v sep="${sep}" 'BEGIN{f=0} \
+  {if($0 ~ sep){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
   END{for(n in a){if(a[n] ~ key){gsub("___","\n",a[n]);print a[n]}}}'
 }
 
 mylsec-v () {
-  awk -v key="${key}" 'BEGIN{f=0} \
-  {if($0 ~ /^[A-Za-z0-9]/){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
+  awk -v key="${key}" -v sep="${sep}" 'BEGIN{f=0} \
+  {if($0 ~ sep){f++;a[f]=$0}else{a[f]=a[f]"___"$0}}\
   END{for(n in a){if(a[n] !~ key){gsub("___","\n",a[n]);print a[n]}}}'
 }
+
+if [ "$1" == "-sep" ];then
+  shift;
+  case $1 in
+    -1)
+      sep="${sep1}"
+      shift
+      ;;
+    -2)
+      sep="${sep2}"
+      shift
+      ;;
+    -3)
+      sep="${sep3}"
+      shift
+      ;;
+    *)
+      sep=$1
+      shift
+      ;;
+  esac
+fi
 
 case "$1" in
   -v)
@@ -32,7 +61,7 @@ case "$1" in
     exit 0
     ;;
   -h)
-    echo "Usage     : $(basename $0) [-v|-h] keyword list" >&2
+    echo "Usage     : $(basename $0) [-sep separate-keyword] [-v|-h] keyword list" >&2
     echo "Version   : $(basename $0) -V" >&2
     exit 1
     ;;
