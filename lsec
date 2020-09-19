@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=1.1
+version=1.2
 lastupdate="2019/09/16" # v1.0
 lastupdate="2020/08/03" # v1.1
 lastupdate="2020/08/05" # v1.2 add option [-sep]
