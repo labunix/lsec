@@ -5,7 +5,7 @@ lastupdate="2019/09/16" # v1.0
 lastupdate="2020/08/03" # v1.1
 lastupdate="2020/08/05" # v1.2 add option [-sep]
 
-sep1="^[A-Za-z0-9\*]"
+sep1="^[A-Za-z0-9]"
 sep2="^\134["
 sep3="#  TAG:"
 sep="${sep1}"
