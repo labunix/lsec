@@ -1,0 +1,110 @@
+#!/bin/bash
+
+function char2num() {
+  echo "[char2num]"
+  echo $@ | sed -e 's/./&\n/g' | \
+  awk -F '\n' \
+    '{for(a=1;a<=NF;a++) \
+     {print "echo $(printf \042%3d\042 \134\042\042"$a"\042)" | "bash" }}' | \
+  tr '\n' ' ';echo
+}
+
+function num2char() {
+  echo "[num2char]"
+  echo $@ | \
+  awk '{for(a=1;a<=NF;a++){printf "0x%x\n",$a}}' | \
+  awk '{gsub("0x","",$0);print "echo \042$((0x"$0"))\042 | awk \047{printf \042%c\042,$1}\047" | "bash"}'
+  echo
+}
+
+function char2oct() {
+  echo "[char2oct]"
+  char2num $@ | \
+    awk '!/^\[/{for(a=1;a<=NF;a++){printf "%03o ",$a}}END{printf "\n"}'
+}
+
+function oct2char() {
+  echo "[oct2char]"
+  mynum=$(echo $@ | \
+    awk '/^[0-9 ]*$/{for(a=1;a<=NF;a++){print "echo -n $((0"$a"+0))\042 \042" | "sh"}}')
+  num2char ${mynum} | awk '!/^\[/'
+}
+
+function char2hex() {
+  echo "[char2hex]"
+  char2num $@ | \
+    awk '!/^\[/{for(a=1;a<=NF;a++){printf "0x%x ",$a}}END{printf "\n"}' 
+}
+
+function hex2char() {
+  echo "[hex2char]"
+  mynum=$(echo $@ | awk '/0x[0-9]*/{for(a=1;a<=NF;a++){print "echo $(("$a"))" | "bash"}}' | tr '\n' ' ')
+  num2char ${mynum} | awk '!/^\[/'
+}
+
+function char2bit() {
+  echo "[char2bit]"
+  char2num $@ | \
+    awk '!/^\[/{for(a=1;a<=NF;a++) \
+         {print "echo \042ibase=10;obase=2 ;"$a"\042 | bc" | "bash"}}' | \
+    tr '\n' ' ';echo   
+}
+
+function bit2char() {
+  echo "[bit2char]"
+  mynum=$(echo $@ | \
+     awk '/^[0-1 ]*$/{for(a=1;a<=NF;a++) \
+       {print "echo $(( 2#"$a" ))" | "bash"}}' )
+  num2char ${mynum} | awk '!/^\[/'
+}
+
+if [ $# -eq 0 ];then
+  echo "`seq 32 126`" | awk '{printf "%c,\\%03o\n",$1,$1}'
+  awk -v cmd=$(basename $0) 'BEGIN{print "Usage: "cmd" [-opt] [word|number]\n"}{if($1 ~ /-[a-z][a-z]/){gsub(")","",$1);printf "  [%s] = ",$1;getline;getline;print $1}}' $(basename $0)
+  exit 1
+fi
+case $1 in
+  -nc)
+    shift
+    num2char $@
+    ;;
+  -cn)
+    shift
+    char2num $@
+    ;;
+  -oc)
+    shift
+    oct2char $@
+    ;;
+  -co)
+    shift
+    char2oct $@
+    ;;
+  -xc)
+    shift
+    hex2char $@
+    ;;
+  -cx)
+    shift
+    char2hex $@
+    ;;
+  -bc)
+    shift
+    bit2char $@
+    ;;
+  -cb)
+    shift
+    char2bit $@
+    ;;
+  *)
+    num2char $@ 
+    char2num $@
+    char2oct $@
+    oct2char $@
+    char2hex $@
+    hex2char $@
+    bit2char $@
+    char2bit $@
+    ;;
+esac
+
